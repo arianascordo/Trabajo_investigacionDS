@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+  title: API de Disponibilidad de Conductores
+  version: 1.0.0
+  description: Consulta de conductores disponibles cerca de un punto de origen.
+servers:
+  - url: http://localhost:8000/api/v1
+
+paths:
+  /conductores/cercanos:
+    get:
+      summary: Lista los conductores disponibles dentro de un radio
+      operationId: consultarConductoresCercanos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: lat_origen
+          in: query
+          required: true
+          description: Latitud del punto de origen
+          schema:
+            type: number
+            format: double
+            minimum: -90
+            maximum: 90
+          example: -27.4511
+        - name: lon_origen
+          in: query
+          required: true
+          description: Longitud del punto de origen
+          schema:
+            type: number
+            format: double
+            minimum: -180
+            maximum: 180
+          example: -58.9867
+        - name: radio_km
+          in: query
+          required: false
+          description: Radio de búsqueda en kilómetros
+          schema:
+            type: number
+            exclusiveMinimum: 0
+            maximum: 5
+            default: 5
+          example: 5
+        - name: tipo_vehiculo
+          in: query
+          required: false
+          description: Filtra por tipo de vehículo
+          schema:
+            $ref: "#/components/schemas/TipoVehiculo"
+      responses:
+        "200":
+          description: Conductores disponibles (la lista puede estar vacía)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConductoresCercanos"
+        "400":
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Token ausente o inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        Token fijo de prueba para este trabajo. Se configura con la
+        variable de entorno TOKEN_FIJO.
+  schemas:
+    TipoVehiculo:
+      type: string
+      enum: [AUTO, MOTO]
+    Conductor:
+      type: object
+      required: [conductor_id, tipo_vehiculo, distancia_km, eta_minutos, timestamp_ubicacion]
+      properties:
+        conductor_id:
+          type: string
+          example: "C-001"
+        tipo_vehiculo:
+          $ref: "#/components/schemas/TipoVehiculo"
+        distancia_km:
+          type: number
+          example: 1.8
+        eta_minutos:
+          type: number
+          example: 4
+        timestamp_ubicacion:
+          type: string
+          format: date-time
+          example: "2026-11-07T15:30:00Z"
+    ConductoresCercanos:
+      type: object
+      required: [total, conductores]
+      properties:
+        total:
+          type: integer
+          example: 1
+        conductores:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conductor"
+    Error:
+      type: object
+      required: [codigo, mensaje]
+      properties:
+        codigo:
+          type: string
+          example: "PARAMETROS_INVALIDOS"
+        mensaje:
+          type: string
