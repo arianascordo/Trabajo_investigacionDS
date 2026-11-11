@@ -1,3 +1,5 @@
-requests
+pact-python==4.2.0
+requests>=2.32,<3
+pytest>=8,<10
 grpcio
 grpcio-tools

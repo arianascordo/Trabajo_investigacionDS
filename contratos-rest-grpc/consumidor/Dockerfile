@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # Trabajamos desde /app dentro del contenedor.
 WORKDIR /app
