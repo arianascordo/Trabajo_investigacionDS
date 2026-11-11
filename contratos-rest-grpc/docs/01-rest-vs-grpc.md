@@ -1,12 +1,6 @@
 # Investigación conceptual de REST/JSON y gRPC/Protobuf
 
-**Integrantes:** \[completar nombres\]
-
-**Fecha:** 11 de noviembre de 2026
-
-## 1. Resumen
-
-Este documento presenta los fundamentos técnicos de REST con JSON y de gRPC con Protocol Buffers (Protobuf), dos enfoques ampliamente utilizados para comunicar servicios en arquitecturas distribuidas. Se describe qué problemas resuelve cada uno, cuáles son sus características principales y cómo se comparan en tres dimensiones: definición de contratos, interoperabilidad y rendimiento. La conclusión es que ninguno es superior en términos absolutos: la elección depende del contexto de uso, del tipo de consumidores y de los requisitos de latencia y volumen de datos.
+Este trabajo explica qué son REST/JSON y gRPC/Protobuf, dos formas de hacer que los servicios de un sistema se comuniquen entre sí. Para cada uno vemos qué problema resuelve y cómo funciona. Después los comparamos según cómo definen sus contratos, qué tan fácil es integrarlos con otras tecnologías y cómo rinden. No hay uno mejor que el otro: conviene uno u otro según quién lo va a usar y cuánto tráfico tiene que soportar.
 
 ## 2. Introducción y problema que se aborda
 
