@@ -1,6 +1,6 @@
 # Contract Testing con Pact
 
-## 1. ¿Qué es una prueba de contrato?
+## ¿Qué es una prueba de contrato?
 Cuando dos servicios se comunican, entre ellos existe un **contrato**: un acuerdo sobre qué se pide (ruta, parámetros, headers) y qué se responde (código de estado, campos y tipos).
 
 Una **prueba de contrato** comprueba que ambos lados cumplen ese acuerdo, **sin necesidad de levantar los dos servicios juntos**. Cada servicio se prueba por separado contra el contrato.
@@ -11,14 +11,14 @@ _¿Por qué no alcanza con otras pruebas?_
 
 La prueba de contrato queda en el medio: es rápida como una prueba unitaria, pero detecta incompatibilidades como una de integración.
 
-## 2. Contratos dirigidos por el consumidor
+## Contratos dirigidos por el consumidor
 Pact sigue el enfoque **Consumer-Driven Contracts** (contratos dirigidos por el consumidor):
 - El **consumidor** escribe lo que necesita del proveedor (solo los campos que realmente usa).
 - El **proveedor** debe demostrar que cumple con todo lo que sus consumidores necesitan.
 
 La ventaja es que el proveedor sabe exactamente qué partes de su API están en uso. Puede cambiar libremente lo que nadie consume, y sabe qué cambios rompen a alguien.
 
-## 3. ¿Qué es Pact?
+## ¿Qué es Pact?
 [Pact](https://docs.pact.io/) es una herramienta de código abierto para hacer pruebas de contrato. Tiene librerías para varios lenguajes (Python, Java, JavaScript, Go, etc.), por lo que consumidor y proveedor pueden estar escritos en lenguajes distintos.
 
 ### Conceptos clave
@@ -32,17 +32,10 @@ La ventaja es que el proveedor sabe exactamente qué partes de su API están en 
 | Matchers | Reglas flexibles: se valida el **tipo/formato**, no el valor exacto | `total` es entero, `tipo_vehiculo` es `AUTO` o `MOTO` |
 | Pact Broker | Servidor donde se publican y comparten los contratos | No se usa: el contrato se comparte por la carpeta `pacts/` del repo |
 
-## 4. ¿Cómo funciona Pact?
+## ¿Cómo funciona Pact?
 El proceso tiene dos etapas, una de cada lado:
 
-```mermaid
-flowchart LR
-    A[Test del consumidor] -->|1. habla con| B[Mock de Pact]
-    B -->|2. genera| C[(Contrato .json)]
-    C -->|3. se comparte| D[Verificador de Pact]
-    D -->|4. reproduce solicitudes| E[Proveedor real]
-    E -->|5. compara respuestas| D
-```
+![Cómo funciona Pact](02-como-funciona-pact.png)
 
 **Etapa 1: lado consumidor**
 1. En el test, el consumidor define la interacción: "si envío esta solicitud, espero esta respuesta".
@@ -62,7 +55,7 @@ flowchart LR
 - Si el consumidor empieza a pedir algo nuevo que el proveedor todavía no ofrece, la verificación del proveedor también falla, mostrando que todavía no se puede desplegar.
 - Con un Pact Broker existe el comando `can-i-deploy`, que responde: "¿esta versión de mi servicio es compatible con las versiones que están en producción?". Así se bloquea un despliegue incompatible.
 
-## 5. Ejemplo práctico en nuestro escenario
+## Ejemplo práctico en nuestro escenario
 Para ilustrar el funcionamiento usamos el escenario del README: Solicitudes y despacho pide a Ubicación y disponibilidad los conductores cercanos por REST (`GET /api/v1/conductores/cercanos`, definido en [`disponibilidad.yaml`](../contratos/openapi/disponibilidad.yaml)).
 
 Los fragmentos son ilustrativos (librería `pact-python`). La implementación completa corresponde a las actividades 7 (lado consumidor) y 8 (lado proveedor).
@@ -129,13 +122,13 @@ There were 1 pact failures
 
 El mensaje dice exactamente qué consumidor se rompe, en qué interacción y qué campo falta. Sin Pact, este error recién aparecería al integrar ambos servicios.
 
-## 6. Pact frente a OpenAPI y .proto
+## Pact frente a OpenAPI y .proto
 - **OpenAPI / .proto** describen **toda** la API que ofrece el proveedor (lo que _puede_ hacer).
 - **Pact** describe **lo que el consumidor realmente usa** y lo verifica contra el proveedor en ejecución.
 
 Son complementarios: OpenAPI/.proto sirven para diseñar y documentar; Pact para asegurar que los cambios no rompan a ningún consumidor. Para gRPC, Pact no trabaja de forma nativa con HTTP/2 y Protobuf, sino mediante el [plugin de Protobuf](https://github.com/pactflow/pact-protobuf-plugin).
 
-## 7. Limitaciones
+## Limitaciones
 - Solo prueba lo que el consumidor declaró: si el test del consumidor está incompleto, el contrato también.
 - No reemplaza las pruebas funcionales del proveedor (no valida que la lógica de "cercanía" sea correcta, solo la forma de la respuesta).
 - Los estados del proveedor (`given`) requieren preparar datos en el proveedor. Para eso se configura un `state_handler` que, por ejemplo, carga un conductor de prueba.
