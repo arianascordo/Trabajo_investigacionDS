@@ -1,0 +1,39 @@
+syntax = "proto3";
+package disponibilidad.v1; 
+import "google/protobuf/timestamp.proto";
+
+// Enum: tipo de vehiculos
+enum TipoVehiculo{
+    TIPO_VEHICULO_DESCONOCIDO = 0;
+    AUTO = 1;
+    MOTO = 2;
+}
+
+// Mensaje de entrada
+message ConsultaDisponibilidadRequest{
+    double lat_origen = 2;
+    double lon_origen = 3;
+    optional double radio_km = 4;
+    TipoVehiculo tipo_vehiculo = 5;
+}
+
+// Un conductor disponible 
+message Conductor{
+    string conductor_id = 1;
+    TipoVehiculo tipo_vehiculo = 2;
+    double distancia_km = 3;
+    double eta_minutos = 4;
+    google.protobuf.Timestamp timestamp_ubicacion = 5;
+}
+
+// Mensaje de salida
+message DisponibilidadResponse{
+    int32 total = 1;
+    repeated Conductor conductores = 2;
+}
+
+// Servicios: funciones que se pueden llamar a distancia 
+service DisponibilidadService{
+    rpc ConsultarDisponibilidad(ConsultaDisponibilidadRequest)
+        returns (DisponibilidadResponse);
+}
