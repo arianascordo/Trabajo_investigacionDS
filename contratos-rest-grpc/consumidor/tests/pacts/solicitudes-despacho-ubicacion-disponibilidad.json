@@ -1,0 +1,142 @@
+{
+  "consumer": {
+    "name": "solicitudes-despacho"
+  },
+  "interactions": [
+    {
+      "description": "una consulta de conductores cercanos con resultado disponible",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "hay al menos un conductor disponible dentro del radio"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer token-de-prueba"
+          ]
+        },
+        "method": "GET",
+        "path": "/api/v1/conductores/cercanos",
+        "query": {
+          "lat_origen": [
+            "-27.4511"
+          ],
+          "lon_origen": [
+            "-58.9867"
+          ],
+          "radio_km": [
+            "5"
+          ],
+          "tipo_vehiculo": [
+            "AUTO"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "conductores": [
+              {
+                "conductor_id": "001",
+                "distancia_km": 0.12,
+                "eta_minutos": 1,
+                "timestamp_ubicacion": "2026-11-11T10:30:00",
+                "tipo_vehiculo": "AUTO"
+              }
+            ],
+            "total": 1
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.conductores": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.conductores[*].conductor_id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.conductores[*].distancia_km": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.conductores[*].eta_minutos": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.conductores[*].timestamp_ubicacion": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ss",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.conductores[*].tipo_vehiculo": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^(AUTO|MOTO)$"
+                }
+              ]
+            },
+            "$.total": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.5.12",
+      "models": "1.3.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "ubicacion-disponibilidad"
+  }
+}
