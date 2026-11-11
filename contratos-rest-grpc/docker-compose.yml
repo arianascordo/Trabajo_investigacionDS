@@ -1,0 +1,103 @@
+# Actividad 10 - Orquestación del entorno y demostración práctica
+#
+# Uso rápido (desde la carpeta contratos-rest-grpc/):
+#   docker compose up --build            -> levanta el proveedor y corre la comparativa de carga
+#   docker compose run --rm consumidor   -> repite la comparativa (el proveedor sigue arriba)
+#   docker compose --profile pact ...    -> servicios de Contract Testing (ver demo/guion.md)
+#   docker compose down                  -> apaga todo
+#
+# Los servicios se encuentran por nombre dentro de la red de Docker:
+# el consumidor llega al proveedor como "proveedor:8000" (REST) y "proveedor:50051" (gRPC).
+
+services:
+
+  # ---------------------------------------------------------------
+  # Proveedor (M4 - Ubicación y disponibilidad). Actividad 5.
+  # Expone el mismo servicio por REST (8000) y por gRPC (50051).
+  # ---------------------------------------------------------------
+  proveedor:
+    build: ./proveedor
+    container_name: proveedor
+    ports:
+      - "8000:8000"     # REST  -> http://localhost:8000/docs muestra el Swagger
+      - "50051:50051"   # gRPC
+    healthcheck:
+      # Se considera "listo" cuando los dos puertos aceptan conexiones.
+      # (La imagen slim no trae curl, por eso se usa Python.)
+      test: ["CMD", "python", "-c", "import socket; [socket.create_connection(('localhost', p), 2).close() for p in (8000, 50051)]"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 3s
+
+  # ---------------------------------------------------------------
+  # Consumidor (simula M5 - Solicitudes y despacho). Actividad 6.
+  # Manda la misma carga a REST y a gRPC, imprime el resumen
+  # y deja el CSV crudo en resultados/crudos/ (lo usa la Actividad 9).
+  # ---------------------------------------------------------------
+  consumidor:
+    build: ./consumidor
+    container_name: consumidor
+    depends_on:
+      proveedor:
+        condition: service_healthy
+    environment:
+      REST_URL: http://proveedor:8000/api/v1/conductores/cercanos
+      GRPC_TARGET: proveedor:50051
+    volumes:
+      - ./resultados/crudos:/resultados
+    command: >
+      sh -c "python carga/simular_carga.py &&
+             cp carga/resultados_carga.csv /resultados/resultados_carga.csv &&
+             echo 'CSV copiado a resultados/crudos/resultados_carga.csv'"
+
+  # ===============================================================
+  # Contract Testing con Pact (Actividades 7 y 8).
+  # Solo se levantan con:  docker compose --profile pact ...
+  # Dependen de que estén hechos los tests y de que pact-python y pytest
+  # estén en los requirements.txt (ver "Acuerdos" en demo/guion.md).
+  # ===============================================================
+
+  # Proveedor con el cambio intencional en la respuesta (Actividad 8).
+  # Es la misma imagen; la variable PROVEEDOR_INCOMPATIBLE activa el cambio.
+  proveedor-incompatible:
+    profiles: ["pact"]
+    build: ./proveedor
+    container_name: proveedor-incompatible
+    environment:
+      PROVEEDOR_INCOMPATIBLE: "true"
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8000), 2).close()"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  # Lado consumidor: corre los tests de Pact y genera el JSON en pacts/ (Actividad 7).
+  pact-consumidor:
+    profiles: ["pact"]
+    build: ./consumidor
+    environment:
+      PACT_DIR: /pacts
+    volumes:
+      - ./consumidor/tests:/app/tests
+      - ./pacts:/pacts
+    command: ["python", "-m", "pytest", "-v", "tests/test_pact_consumidor.py"]
+
+  # Lado proveedor: lee el JSON de pacts/ y lo verifica contra un proveedor real (Actividad 8).
+  # Por defecto verifica contra el proveedor correcto; para mostrar el fallo:
+  #   docker compose --profile pact run --rm -e PROVEEDOR_URL=http://proveedor-incompatible:8000 pact-verificador
+  pact-verificador:
+    profiles: ["pact"]
+    build: ./proveedor
+    depends_on:
+      proveedor:
+        condition: service_healthy
+    environment:
+      PACT_DIR: /pacts
+      PROVEEDOR_URL: http://proveedor:8000
+    volumes:
+      - ./proveedor/tests:/app/tests
+      - ./pacts:/pacts
+    command: ["python", "-m", "pytest", "-v", "tests/test_pact_verificacion.py"]
