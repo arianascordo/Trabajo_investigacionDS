@@ -4,10 +4,10 @@
 
 Para evaluar la eficiencia en la transmisión, se midió el tamaño del mensaje de respuesta para la consulta de disponibilidad transportando exactamente el mismo conjunto de datos.
 
-| Protocolo | Formato de Serialización | Tamaño del Payload | Reducción de Tamaño | 
-| ----- | ----- | ----- | ----- | 
-| **REST** | JSON (Texto plano) | 153 Bytes | Base de referencia | 
-| **gRPC** | Protocol Buffers (Binario) | 37 Bytes | 75.8% menor | 
+| Protocolo | Formato de Serialización | Tamaño del Payload | Reducción de Tamaño |
+| ----- | ----- | ----- | ----- |
+| **REST** | JSON (Texto plano) | 153 Bytes | Base de referencia |
+| **gRPC** | Protocol Buffers (Binario) | 37 Bytes | 75.8% menor |
 
 **Justificación Técnica:** La diferencia obtenida de 116 bytes a favor de gRPC radica en el mecanismo de serialización. JSON transmite objetos en texto plano, repitiendo las claves (keys) por cada registro. Por el contrario, Protobuf serializa la información en formato binario y omite las claves, reemplazándolas por identificadores numéricos predefinidos en el archivo `.proto`. En escenarios de alta concurrencia dentro de la plataforma de movilidad, esta reducción de payload disminuye drásticamente el consumo de ancho de banda y la saturación de la red interna.
 
@@ -15,10 +15,10 @@ Para evaluar la eficiencia en la transmisión, se midió el tamaño del mensaje 
 
 Se sometió a los servicios a una simulación de carga concurrente enviando el mismo conjunto de datos a ambos endpoints (REST y gRPC) para recolectar las métricas de latencia reales.
 
-| Métrica de Latencia | REST (JSON) | gRPC (Protobuf) | Diferencia | 
-| ----- | ----- | ----- | ----- | 
-| **Promedio** | 78.39 ms | 33.07 ms | 2.37x más rápido | 
-| **Percentil 99 (p99)** | 206.97 ms | 76.96 ms | 2.69x más rápido | 
+| Métrica de Latencia | REST (JSON) | gRPC (Protobuf) | Diferencia |
+| ----- | ----- | ----- | ----- |
+| **Promedio** | 78.39 ms | 33.07 ms | 2.37x más rápido |
+| **Percentil 99 (p99)** | 206.97 ms | 76.96 ms | 2.69x más rápido |
 
 **Justificación Técnica:** Los resultados reflejan una clara ventaja de rendimiento de gRPC. Por los siguientes motivos:
 
