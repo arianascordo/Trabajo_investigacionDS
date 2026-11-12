@@ -2,3 +2,5 @@ grpcio
 protobuf
 fastapi
 uvicorn
+pact-python==4.2.0
+pytest>=8,<10

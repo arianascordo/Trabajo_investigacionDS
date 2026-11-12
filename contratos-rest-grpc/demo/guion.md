@@ -83,7 +83,7 @@ gRPC
 ```bash
 docker compose --profile pact run --rm pact-consumidor
 ```
-Los tests pasan y aparece el JSON del contrato en `pacts/`. **Abrirlo y mostrarlo**: es lo que M5 espera recibir de M4.
+Los tests pasan y aparece el JSON del contrato en `consumidor/tests/pacts/`. **Abrirlo y mostrarlo**: es lo que M5 espera recibir de M4.
 
 **3.2 El proveedor correcto cumple el contrato:**
 ```bash
@@ -141,5 +141,5 @@ El `docker-compose.yml` ya tiene los servicios de Pact. Para que funcionen, esas
 |---|---|
 | `port is already allocated` | Hay algo usando el 8000 o el 50051. Correr `docker compose down` o cerrar el uvicorn local. |
 | El consumidor da errores de conexión | Revisar con `docker compose ps` que `proveedor` esté `healthy`, y los logs con `docker compose logs proveedor`. |
-| `pact-verificador` no encuentra el contrato | Primero hay que correr `pact-consumidor` (paso 3.1) para que exista el JSON en `pacts/`. |
+| `pact-verificador` no encuentra el contrato | Primero hay que correr `pact-consumidor` (paso 3.1) para que exista el JSON en `consumidor/tests/pacts/`. |
 | Se cambió código y no se ve el cambio | Reconstruir con `docker compose build` (o `up --build`). |
