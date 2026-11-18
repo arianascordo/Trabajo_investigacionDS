@@ -7,7 +7,7 @@ from google.protobuf.timestamp_pb2 import Timestamp
 import disponibilidad_pb2
 import disponibilidad_pb2_grpc
 
-from logica import consultar_disponibilidad
+from logica import consultar_disponibilidad, CAMPO_ID
 
 
 class DisponibilidadServicer(
@@ -69,7 +69,8 @@ class DisponibilidadServicer(
 
                 nuevo_conductor = respuesta.conductores.add()
 
-                nuevo_conductor.conductor_id = conductor["conductor_id"]
+                # CAMPO_ID solo cambia en el modo incompatible de la demo de Pact (REST).
+                nuevo_conductor.conductor_id = conductor[CAMPO_ID]
 
                 nuevo_conductor.tipo_vehiculo = (
                     disponibilidad_pb2.AUTO

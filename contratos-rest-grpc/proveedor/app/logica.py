@@ -1,4 +1,12 @@
+import os
+
 from datos import buscar_conductores_cercanos
+
+# Actividad 8: cambio intencional para demostrar que Pact detecta la ruptura.
+# Con PROVEEDOR_INCOMPATIBLE=true el campo "conductor_id" se renombra a
+# "id_conductor", que es justo el tipo de cambio que rompería a M5.
+INCOMPATIBLE = os.getenv("PROVEEDOR_INCOMPATIBLE", "false").lower() == "true"
+CAMPO_ID = "id_conductor" if INCOMPATIBLE else "conductor_id"
 
 def consultar_disponibilidad(latitud, longitud, tipo_vehiculo, radio_km):
 
@@ -16,7 +24,7 @@ def consultar_disponibilidad(latitud, longitud, tipo_vehiculo, radio_km):
         eta = max(1, round(distancia * 3))
 
         conductores_resultado.append({
-            "conductor_id": conductor["conductor_id"],
+            CAMPO_ID: conductor["conductor_id"],
             "tipo_vehiculo": conductor["tipo_vehiculo"],
             "distancia_km": distancia,
             "eta_minutos": eta,
