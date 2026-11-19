@@ -21,6 +21,8 @@ services:
     ports:
       - "8000:8000"     # REST  -> http://localhost:8000/docs muestra el Swagger
       - "50051:50051"   # gRPC
+    environment:
+      TOKEN_FIJO: "${TOKEN_FIJO:-token-de-prueba}"
     healthcheck:
       # Se considera "listo" cuando los dos puertos aceptan conexiones.
       # (La imagen slim no trae curl, por eso se usa Python.)
@@ -44,6 +46,7 @@ services:
     environment:
       REST_URL: http://proveedor:8000/api/v1/conductores/cercanos
       GRPC_TARGET: proveedor:50051
+      TOKEN_FIJO: "${TOKEN_FIJO:-token-de-prueba}"
     volumes:
       - ./resultados/crudos:/resultados
     command: >
@@ -66,6 +69,7 @@ services:
     container_name: proveedor-incompatible
     environment:
       PROVEEDOR_INCOMPATIBLE: "true"
+      TOKEN_FIJO: "${TOKEN_FIJO:-token-de-prueba}"
     ports:
       - "8001:8000"
     healthcheck:
