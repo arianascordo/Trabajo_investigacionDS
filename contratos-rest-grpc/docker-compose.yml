@@ -97,7 +97,9 @@ services:
     environment:
       PACT_DIR: /pacts
       PROVEEDOR_URL: http://proveedor:8000
+      PACT_DO_NOT_TRACK: "true"
     volumes:
       - ./proveedor/tests:/app/tests
-      - ./pacts:/pacts
-    command: ["python", "-m", "pytest", "-v", "tests/test_pact_verificacion.py"]
+      # El test del consumidor escribe el contrato en consumidor/tests/pacts.
+      - ./consumidor/tests/pacts:/pacts
+    command: ["python", "-m", "pytest", "-v", "-s", "tests/test_pact_verificacion.py"]

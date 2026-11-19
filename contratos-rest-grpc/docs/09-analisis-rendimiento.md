@@ -15,10 +15,11 @@ Para evaluar la eficiencia en la transmisión, se midió el tamaño del mensaje 
 
 Se sometió a los servicios a una simulación de carga concurrente enviando el mismo conjunto de datos a ambos endpoints (REST y gRPC) para recolectar las métricas de latencia reales.
 
-| Métrica de Latencia | REST (JSON) | gRPC (Protobuf) | Diferencia | 
-| ----- | ----- | ----- | ----- | 
-| **Promedio** | 78.39 ms | 33.07 ms | 2.37x más rápido | 
-| **Percentil 99 (p99)** | 206.97 ms | 76.96 ms | 2.69x más rápido | 
+| Métrica de Latencia | REST (JSON) | gRPC (Protobuf) | Diferencia |
+| ----- | ----- | ----- | ----- |
+| **Promedio** | 78.39 ms | 33.07 ms | 2.37x más rápido |
+| **Mediana (p50)** | 56.92 ms | 32.04 ms | 1.78x más rápido |
+| **Percentil 95 (p95)** | 193.33 ms | 67.61 ms | 2.86x más rápido |
 
 **Justificación Técnica:** Los resultados reflejan una clara ventaja de rendimiento de gRPC. Por los siguientes motivos:
 
