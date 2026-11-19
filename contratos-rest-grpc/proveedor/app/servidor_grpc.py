@@ -1,7 +1,8 @@
 from concurrent import futures
 from datetime import datetime, timezone
-import grpc
+import os
 
+import grpc
 from google.protobuf.timestamp_pb2 import Timestamp
 
 import disponibilidad_pb2
@@ -15,6 +16,23 @@ class DisponibilidadServicer(
 ):
 
     def ConsultarDisponibilidad(self, request, context):
+        token_esperado = os.getenv("TOKEN_FIJO", "")
+        metadata = dict(context.invocation_metadata())
+        authorization = metadata.get("authorization", "")
+
+        esquema, separador, token_recibido = authorization.partition(" ")
+
+        if (
+            not token_esperado
+            or esquema.lower() != "bearer"
+            or not separador
+            or token_recibido != token_esperado
+        ):
+            context.abort(
+                grpc.StatusCode.UNAUTHENTICATED,
+                "Token ausente o inválido",
+            )
+
         try:
             lat_origen = request.lat_origen
             lon_origen = request.lon_origen
@@ -49,7 +67,7 @@ class DisponibilidadServicer(
                 lat_origen,
                 lon_origen,
                 tipo_vehiculo,
-                radio_km
+                radio_km,
             )
 
             respuesta = disponibilidad_pb2.DisponibilidadResponse(
@@ -87,7 +105,7 @@ class DisponibilidadServicer(
         except ValueError as e:
             context.abort(
                 grpc.StatusCode.INVALID_ARGUMENT,
-                str(e)
+                str(e),
             )
 
 
@@ -98,7 +116,7 @@ def serve():
 
     disponibilidad_pb2_grpc.add_DisponibilidadServiceServicer_to_server(
         DisponibilidadServicer(),
-        server
+        server,
     )
 
     server.add_insecure_port("[::]:50051")
